@@ -1,7 +1,7 @@
 import { User } from './user.model.mjs';
 import { Message } from './message.model.mjs';
 import { default as buildUiElements } from './chat-ui.model.mjs';
-import { pipe, createMessageContainer } from './utils.mjs'
+import { pipe, createMessageContainer, createDateDivider, isSameDay} from './utils.mjs'
 
 const currentUser = new User();
 
@@ -14,7 +14,7 @@ function setUp() {
     const addMessagesAndTriggers = pipe(addMessages, createTriggers);   
     messagesRequest
     .then((res) => res.json())
-    .then( (messages) => addMessagesAndTriggers({messages, uiElements}) );    
+    .then((messages) => addMessagesAndTriggers({messages, uiElements}) );    
 }
 
 function createNewMessage(body) { 
@@ -22,12 +22,22 @@ function createNewMessage(body) {
 }
 
 function createTriggers({messages, uiElements}) {
-    uiElements.sendButton.addEventListener('click', inputMessage.bind({ messages }) );
+    const callback = inputMessage.bind({ messages, uiElements });
+    uiElements.sendButton.addEventListener('click', callback );
+    uiElements.messageInput.addEventListener('keydown', (evt) =>  {
+        if(evt.keyCode === 13 && evt.ctrlKey) {
+            callback(evt);
+        }
+    });
 }
 
 function addMessages({messages, uiElements}) {  
-    const temp = document.createElement('div');         
+    const temp = document.createElement('div'); 
+    let currentDivider;       
     messages.forEach((message) => {
+         if(!currentDivider || !isSameDay(currentDivider, message.content.dateSent)) {
+             temp.appendChild(createDateDivider(message.content.dateSent));
+         }
          const messageContainer = createMessageContainer(message);
          temp.appendChild(messageContainer);                    
     });
@@ -41,18 +51,18 @@ function addMessages({messages, uiElements}) {
 
 function inputMessage(evt) {
     evt.preventDefault();                
-    const formData = new FormData(uiElements.messageForm);
+    const formData = new FormData(this.uiElements.messageForm);
     const msg = formData.get("message").trim();
     if(!msg.length) {
         return;
     }
     // @ TODO sanitize message
-    uiElements.messageInput.value = '';
+    this.uiElements.messageInput.value = '';
     this.messages = this.messages.concat(createNewMessage(msg));
-    addMessages(this.messages);    
+    addMessages(this);    
 }
 
-function createScrollObserver({uiElements}) {   
+function createScrollObserver(uiElements) {   
     const { chatBoxMessages } = uiElements; 
     // Options for the observer (which mutations to observe)
     const config = { attributes: false, childList: true, subtree: false };

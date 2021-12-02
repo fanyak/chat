@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title> chat </title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous">        
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-/bQdsTh/da6pkI1MST/rWKFNjaCP5gBSY4sEBT38Q/9RBh9AH40zEOg7Hlq2THRZ" crossorigin="anonymous"></script>
+
+        <style>
+            body {
+                position: relative;
+                width: 100vw;
+                height: 100vh;
+                margin: 0;
+            }
+            .chat-box {
+                position: absolute;
+                bottom: 0;
+                left: 40vw;
+                display: flex;
+                width: 500px;
+                max-height: 400px;
+                flex-direction: column;
+            }
+            .messages {
+                width: 100%;
+                height: calc(100% - 40px);
+                overflow-y: scroll;
+            }
+            .messages .avatar {
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+            }
+            .chat-box .type-container {
+                width: 100%;
+                height: 40px;
+            }
+            .chat-box .type-container input {
+                width: 80%;
+                height: 100%;
+            }
+            .chat-box .type-container input {
+                width: 20%;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="chat-box">
+            <div class="messages"></div>
+            <div class="type-container">
+                <form name="message-form">
+                    <input type="text" name="message" class="message-input">
+                    <button class="send-button">ok</button>
+                </form>
+            </div>
+        </div>
+
+        <script src="https://raw.githubusercontent.com/fanyak/chat/main/app.js" type="module"></script>
+        <script>
+            let messages = [{
+                user: {
+                    id: 1,
+                    name: 'me',
+                    avatar: 'https://via.placeholder.com/150/24f355'
+                },
+                message: {
+                    body: "Hello",
+                    dateSent: "2021/05/03"
+                }                
+            }];
+
+            const sendButton = document.querySelector('.send-button');
+            const input = document.querySelector('.message-input');
+            const messageForm = document.querySelector('form[name = "message-form"]');
+            const chatBoxMessages = document.querySelector('.chat-box .messages');
+            const currentUser = 
+
+
+            window.addEventListener("load", setUp);
+
+            function setUp() {
+                createScrollObserver();
+                addMessages();               
+            }
+
+
+            sendButton.addEventListener('click', (evt) => {
+               evt.preventDefault();                
+               const formData = new FormData(messageForm);
+               const msg = formData.get("message").trim();
+               if(!msg.length) {
+                   return;
+               }
+               // @ TODO sanitize message
+               input.value = '';
+               messages = messages.concat(createNewMessage(msg));
+               addMessages();
+               // messages = messagesArray;
+            });
+
+            function createMessageContainer(message) {
+                const container = document.createElement("div");
+                container.classList.add("d-flex");
+                const icon = document.createElement("img")
+                icon.setAttribute('src', message.user.avatar);
+                icon.classList.add('avatar');
+                container.appendChild(icon);
+                const info = document.createElement('div');
+                const messageInfo = document.createElement('div');
+                const name = document.createElement('span');
+                const nameNode = document.createTextNode(message.user.name);
+                name.appendChild(nameNode);
+                const date = document.createElement('span');
+                const dateNode = document.createTextNode(message.message.dateSent);
+                date.appendChild(dateNode);
+                messageInfo.appendChild(name);
+                messageInfo.appendChild(date);
+                info.appendChild(messageInfo);
+                const body = document.createElement('div');
+                const textNode = document.createTextNode(message.message.body);
+                body.appendChild(textNode);
+                info.appendChild(body);
+                container.appendChild(info);
+                return container;
+            }
+
+            function createNewMessage(text) {
+                const dt = new Date();
+                const date = `${dt.getFullYear()}/${dt.getMonth()+1}/${dt.getDate()}`;
+                message = {
+                    user: {
+                        id: 1,
+                        name: 'me',
+                        avatar: 'https://via.placeholder.com/150/24f355'
+                    },
+                    message: {
+                        body: text,
+                        dateSent: date
+                    }
+                }
+                return message;
+            }
+
+            function addMessages() {  
+               //chatBoxMessages.innerHTML = '';  
+                const temp = document.createElement('div');         
+                messages.forEach((message) => {
+                    const messageContainer = createMessageContainer(message);
+                    temp.appendChild(messageContainer);                    
+                });
+                window.requestAnimationFrame(() => {
+                    const existingMessages = chatBoxMessages.firstChild;
+                    const remove = existingMessages && chatBoxMessages.removeChild(existingMessages);                
+                    chatBoxMessages.appendChild(temp.cloneNode(true)); 
+                });
+            }
+            
+            function createScrollObserver() {
+                
+                // Options for the observer (which mutations to observe)
+                const config = { attributes: false, childList: true, subtree: false };
+
+                // Callback function to execute when mutations are observed
+                const callback = function(mutationsList, observer) {
+                    for(const mutation of mutationsList) {
+                        if (mutation.type === 'childList' && mutation.addedNodes.length) {
+                            // console.log(mutation)
+                            // console.log('A child node has been added or removed.');
+                            const scrollHeight = chatBoxMessages.scrollHeight;
+                            chatBoxMessages.scrollTo(0, scrollHeight);
+                        }
+                        // else if (mutation.type === 'attributes') {
+                        //     console.log('The ' + mutation.attributeName + ' attribute was modified.');
+                        // }
+                    }
+                };
+
+                // Create an observer instance linked to the callback function
+                const observer = new MutationObserver(callback);
+
+                // Start observing the target node for configured mutations
+                observer.observe(chatBoxMessages, config);
+                 // stop observing
+                // observer.disconnect();
+            }
+
+        </script>
+    </body>
+</html>

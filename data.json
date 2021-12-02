@@ -1,0 +1,11 @@
+[{
+    "user": {
+        "id": "1",
+        "name": "me",
+        "avatar": "https://via.placeholder.com/150/24f355"
+    },
+    "content": {
+        "body": "Hello",
+        "dateSent": "12-03-2021"
+    }                
+}]

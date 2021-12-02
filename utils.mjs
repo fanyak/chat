@@ -37,12 +37,11 @@ export function createMessageContainer(message) {
     return container;
 };
 
-export function createDateDivider(dataSent) {
+export function createDateDivider(dateSent) {
     const div = document.createElement('div');
     div.classList.add('date-divider');
     const [weekDay, month, day, year] = new Date(dateSent*1000).toString().split(' ')
-    const date = document.createTextNode(`${month} ${day}, ${year}`);
-    const dateNode = document.createTextNode(date);
+    const dateNode = document.createTextNode(`${month} ${day}, ${year}`);
     div.append(dateNode);
     return div;
 }

@@ -35,8 +35,10 @@ function addMessages({messages, uiElements}) {
     const temp = document.createElement('div'); 
     let currentDivider;       
     messages.forEach((message) => {
-         if(!currentDivider || !isSameDay(currentDivider, message.content.dateSent)) {
-             temp.appendChild(createDateDivider(message.content.dateSent));
+        const dateSent = message.content.dateSent;
+         if(!currentDivider || !isSameDay(currentDivider, dateSent)) {
+             temp.appendChild(createDateDivider(dateSent));
+             currentDivider = dateSent;
          }
          const messageContainer = createMessageContainer(message);
          temp.appendChild(messageContainer);                    

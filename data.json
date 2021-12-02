@@ -5,7 +5,18 @@
         "avatar": "https://via.placeholder.com/150/24f355"
     },
     "content": {
-        "body": "Hello",
+        "body": "Hello! How are you?",
+        "dateSent": "12-03-2021"
+    }                
+},
+{
+    "user": {
+        "id": "2",
+        "name": "you",
+        "avatar": "https://via.placeholder.com/150/56a8c2"
+    },
+    "content": {
+        "body": "I am well thank you. How are you?",
         "dateSent": "12-03-2021"
     }                
 }]

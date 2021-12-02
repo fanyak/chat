@@ -1,6 +1,6 @@
 const uiElements = {
     sendButton: '.send-button',
-    messageInput: 'input.message-input',
+    messageInput: 'textarea.message-input',
     messageForm: 'form[name = "message-form"]',
     chatBoxMessages: '.chat-box .messages',
 };

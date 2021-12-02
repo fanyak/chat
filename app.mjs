@@ -1,44 +1,43 @@
 import { User } from './user.model.mjs';
 import { Message } from './message.model.mjs';
 import { default as buildUiElements } from './chat-ui.model.mjs';
+import { pipe, createMessageContainer } from './utils.mjs'
 
 const currentUser = new User();
-let uiElements = {};
 
-let messagesRequest = fetch('./data.json') ;
+let messagesRequest = fetch('https://fanyak.github.io/chat/data.json');
 
 window.addEventListener("load", setUp);
 
 function setUp() {
-    buildUiElements(uiElements);
-    createScrollObserver();
-    messagesRequest.then((res) => res.json())
-    .then(addMessages)
-    .then(createTriggers);    
+    const uiElements = pipe(buildUiElements, createScrollObserver)({});
+    const addMessagesAndTriggers = pipe(addMessages, createTriggers);   
+    messagesRequest
+    .then((res) => res.json())
+    .then( (messages) => addMessagesAndTriggers({messages, uiElements}) );    
 }
 
 function createNewMessage(body) { 
     return new Message(body, currentUser);
 }
 
-function createTriggers(messages) {
+function createTriggers({messages, uiElements}) {
     uiElements.sendButton.addEventListener('click', inputMessage.bind({ messages }) );
 }
 
-function addMessages(messages) {  
-     const temp = document.createElement('div');         
-     messages.forEach((message) => {
+function addMessages({messages, uiElements}) {  
+    const temp = document.createElement('div');         
+    messages.forEach((message) => {
          const messageContainer = createMessageContainer(message);
          temp.appendChild(messageContainer);                    
-     });
-     window.requestAnimationFrame(() => {
-         const existingMessages = uiElements.chatBoxMessages.firstChild;
-         const _ = existingMessages && uiElements.chatBoxMessages.removeChild(existingMessages);                
-         uiElements.chatBoxMessages.appendChild(temp.cloneNode(true)); 
-     });
-     return messages;
- }
-
+    });
+    window.requestAnimationFrame(() => {
+        const existingMessages = uiElements.chatBoxMessages.firstChild;
+        const _ = existingMessages && uiElements.chatBoxMessages.removeChild(existingMessages);                
+        uiElements.chatBoxMessages.appendChild(temp.cloneNode(true)); 
+    });
+    return {messages, uiElements};
+}
 
 function inputMessage(evt) {
     evt.preventDefault();                
@@ -53,35 +52,8 @@ function inputMessage(evt) {
     addMessages(this.messages);    
 }
 
-function createMessageContainer(message) {
-    const container = document.createElement("div");
-    container.classList.add("d-flex");
-    const icon = document.createElement("img")
-    icon.setAttribute('src', message.user.avatar);
-    icon.classList.add('avatar');
-    container.appendChild(icon);
-    const info = document.createElement('div');
-    const messageInfo = document.createElement('div');
-    const name = document.createElement('span');
-    const nameNode = document.createTextNode(message.user.name);
-    name.appendChild(nameNode);
-    const date = document.createElement('span');
-    const dateNode = document.createTextNode(message.content.dateSent);
-    date.appendChild(dateNode);
-    messageInfo.appendChild(name);
-    messageInfo.appendChild(date);
-    info.appendChild(messageInfo);
-    const body = document.createElement('div');
-    const textNode = document.createTextNode(message.content.body);
-    body.appendChild(textNode);
-    info.appendChild(body);
-    container.appendChild(info);
-    return container;
-}
-
-
-
-function createScrollObserver() {    
+function createScrollObserver({uiElements}) {   
+    const { chatBoxMessages } = uiElements; 
     // Options for the observer (which mutations to observe)
     const config = { attributes: false, childList: true, subtree: false };
 
@@ -91,8 +63,8 @@ function createScrollObserver() {
             if (mutation.type === 'childList' && mutation.addedNodes.length) {
                 // console.log(mutation)
                 // console.log('A child node has been added or removed.');
-                const scrollHeight = uiElements.chatBoxMessages.scrollHeight;
-                uiElements.chatBoxMessages.scrollTo(0, scrollHeight);
+                const scrollHeight = chatBoxMessages.scrollHeight;
+                chatBoxMessages.scrollTo(0, scrollHeight);
             }
             // else if (mutation.type === 'attributes') {
             //     console.log('The ' + mutation.attributeName + ' attribute was modified.');
@@ -103,7 +75,8 @@ function createScrollObserver() {
     const observer = new MutationObserver(callback);
 
     // Start observing the target node for configured mutations
-    observer.observe(uiElements.chatBoxMessages, config);
+    observer.observe(chatBoxMessages, config);
      // stop observing
     // observer.disconnect();
+    return uiElements;
 }

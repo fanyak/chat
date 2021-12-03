@@ -14,7 +14,8 @@ function setUp() {
     const addMessagesAndTriggers = pipe(addMessages, createTriggers);   
     messagesRequest
     .then((res) => res.json())
-    .then((messages) => addMessagesAndTriggers({messages, uiElements}) );    
+    .then((messages) => addMessagesAndTriggers({messages, uiElements}) )
+    .catch(console.log);
 }
 
 function createNewMessage(body) { 
@@ -25,8 +26,11 @@ function createTriggers({messages, uiElements}) {
     const callback = inputMessage.bind({ messages, uiElements });
     uiElements.sendButton.addEventListener('click', callback );
     uiElements.messageInput.addEventListener('keydown', (evt) =>  {
-        if(evt.keyCode === 13 && evt.ctrlKey) {
+        if(evt.keyCode === 13 && !evt.ctrlKey) {
             callback(evt);
+        }
+        if(evt.keyCode === 13 && evt.ctrlKey) {
+            uiElements.messageInput.value += '\n';
         }
     });
 }

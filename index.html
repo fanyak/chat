@@ -21,7 +21,7 @@
                 bottom: 10px;
                 left: 30vw;
                 display: flex;
-                width: 500px;
+                width: 400px;
                 max-height: 400px;
                 flex-direction: column;
             }
@@ -29,6 +29,13 @@
                 width: 100%;
                 height: calc(100% - 40px);
                 overflow-y: auto;
+                padding-right: 5px;
+            }
+            .messages::-webkit-scrollbar {
+                width: 8px;
+                height: 8px;
+                background-color: #aaa; /* or add it to the track */
+                border-radius: 5px;
             }
             .messages .avatar {
                 width: 35px;
@@ -67,6 +74,23 @@
             .chat-box .message-container {
                 padding: 10px;
             }
+           
+            /* .chat-box .message-container.current-user .message-body:before {
+                content: '';
+                position: absolute;
+                border: 1px solid #333;
+                border-color: transparent red;
+                border-width: 5px 7px 5px 0;
+                top: 35%;
+                left: -5px;
+            } */
+            .chat-box .message-container.current-user {
+                justify-content: end;
+            }
+            .chat-box .message-container.current-user img,  .chat-box .message-container.current-user .user {
+               /* justify-content: end; */
+               display: none
+            }
             .chat-box .message-container img {
                 margin-right: 10px;
             }
@@ -77,10 +101,25 @@
             .chat-box .message-container .date {
                 padding-left: 10px;
                 font-size: 0.8rem;
-                color: rgb(129, 126, 126);
+                color: rgb(167, 163, 163);
             }
             .chat-box .message-body {
+                position: relative;
+                padding: 5px;
                 white-space: pre-wrap;  /* <-- THIS PRESERVES THE LINE BREAKS */
+            }
+            .chat-box .message-container.current-user .message-body {
+                border-radius: 3px;
+                background-color: #ddd;
+            }
+            .chat-box .message-container.current-user .message-body:after { /* https://codepen.io/octavioamu/pen/eBkbH */
+                content: '';
+                position: absolute;
+                border: 1px solid rgba(51, 51, 51, 0.19);
+                border-color: transparent #ddd;
+                border-width: 7px 0 7px 6px;
+                top: 35%;
+                right: -6px;
             }
             .chat-box .date-divider {
                 padding: 10px 0;
@@ -99,7 +138,7 @@
                 <form name="message-form" class="d-flex align-items-center justify-content-around">
                     <textarea name="message" class="message-input" placeholder="type a message"></textarea>                    
                     <button class="send-button">
-                        <img src="https://fanyak.github.io/chat/assets/contentSend.svg" width="40px">
+                        <img src="https://fanyak.github.io/chat/assets/contentSend.svg" width="35px">
                     </button>
                 </form>
             </div>

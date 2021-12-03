@@ -9,8 +9,6 @@ export function createMessageContainer(message, currentUser) {
     const container = document.createElement("div");
     container.classList.add("d-flex");
     container.classList.add("message-container");
-    console.log(message.user.id, currentUser.id)
-
     if(message.user.id == currentUser.id) {
         container.classList.add("current-user");  
     }

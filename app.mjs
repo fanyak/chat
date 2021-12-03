@@ -44,7 +44,7 @@ function addMessages({messages, uiElements}) {
              temp.appendChild(createDateDivider(dateSent));
              currentDivider = dateSent;
          }
-         const messageContainer = createMessageContainer(message);
+         const messageContainer = createMessageContainer(message, currentUser);
          temp.appendChild(messageContainer);                    
     });
     window.requestAnimationFrame(() => {

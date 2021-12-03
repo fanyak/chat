@@ -5,10 +5,15 @@ export const pipe = (...fns) => {
     }, input);    
 }
 
-export function createMessageContainer(message) {
+export function createMessageContainer(message, currentUser) {
     const container = document.createElement("div");
     container.classList.add("d-flex");
     container.classList.add("message-container");
+    console.log(message.user.id, currentUser.id)
+
+    if(message.user.id == currentUser.id) {
+        container.classList.add("current-user");  
+    }
     const icon = document.createElement("img")
     icon.setAttribute('src', message.user.avatar);
     icon.classList.add('avatar');

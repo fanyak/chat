@@ -1,20 +1,25 @@
 import { User } from './user.model.mjs';
 import { Message } from './message.model.mjs';
+import { Metadata } from './metadata.model';
 import { default as buildUiElements } from './chat-ui.model.mjs';
-import { pipe, createMessageContainer, createDateDivider, isSameDay} from './utils.mjs'
+import { pipe, createMessageContainer, createDateDivider, isSameDay} from './utils.mjs';
+import { getMedataData, sendMessage } from './chat.service.mjs';
 
 const currentUser = new User();
 
 let messagesRequest = fetch('https://fanyak.github.io/chat/data.json');
 
+
 window.addEventListener("load", setUp);
 
-function setUp() {
+async function setUp() {
+    const { dateFormat, propertyName, reservationId } = await getMedataData();
+    const metadata = new Metadata(dateFormat, propertyName, reservationId);
     const uiElements = pipe(buildUiElements, createScrollObserver)({});
     const addMessagesAndTriggers = pipe(addMessages, createTriggers);   
     messagesRequest
     .then((res) => res.json())
-    .then((messages) => addMessagesAndTriggers({messages, uiElements}) )
+    .then((messages) => addMessagesAndTriggers({messages, uiElements, metadata}) )
     .catch(console.log);
 }
 
@@ -22,8 +27,8 @@ function createNewMessage(body) {
     return new Message(body, currentUser);
 }
 
-function createTriggers({messages, uiElements}) {
-    const callback = inputMessage.bind({ messages, uiElements });
+function createTriggers({messages, uiElements, metadata}) {
+    const callback = inputMessage.bind({ messages, uiElements, metadata});
     uiElements.sendButton.addEventListener('click', callback );
     uiElements.messageInput.addEventListener('keydown', (evt) =>  {
         if(evt.keyCode === 13 && !evt.ctrlKey) {
@@ -35,7 +40,7 @@ function createTriggers({messages, uiElements}) {
     });
 }
 
-function addMessages({messages, uiElements}) {  
+function addMessages({messages, uiElements, metadata}) {  
     const temp = document.createElement('div'); 
     let currentDivider;       
     messages.forEach((message) => {
@@ -64,8 +69,13 @@ function inputMessage(evt) {
     }
     // @ TODO sanitize message
     this.uiElements.messageInput.value = '';
-    this.messages = this.messages.concat(createNewMessage(msg));
-    addMessages(this);    
+    sendMessage(msg, this.reservationId).then(({success}) => {
+        if(success) {
+            this.messages = this.messages.concat(createNewMessage(msg));
+            addMessages(this);  
+        }
+    })
+      
 }
 
 function createScrollObserver(uiElements) {   

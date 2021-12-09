@@ -1,0 +1,29 @@
+{
+  "name": "chat",
+  "version": "1.0.0",
+  "description": "chat app",
+  "main": "app.js",
+  "scripts": {
+    "test": "test",
+    "start": "vite",
+    "dev": "vite",
+    "build": "vite build --base=./",
+    "serve": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "\u001b[3;5~"
+  },
+  "keywords": [
+    "chat"
+  ],
+  "author": "fani akritidou",
+  "license": "ISC",
+  "devDependencies": {
+    "postcss-preset-env": "7.0.0",
+    "vite": "2.x  || >2.0.0-alpha"
+  },
+  "dependencies": {
+    "blingblingjs": "^2.1.1"
+  }
+}

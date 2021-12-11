@@ -1,34 +1,35 @@
-import { User } from './user.model.mjs';
-import { Message } from './message.model.mjs';
-import { Metadata } from './metadata.model';
-import { default as buildUiElements } from './chat-ui.model.mjs';
-import { pipe, createMessageContainer, createDateDivider, isSameDay} from './utils.mjs';
-import { getMedataData, sendMessage } from './chat.service.mjs';
-
-const currentUser = new User();
-
-let messagesRequest = fetch('https://fanyak.github.io/chat/data.json');
+import { Message } from './models/message.model.mjs';
+import { buildUiElements, createTranslations } from './chat-ui.model.mjs';
+import { pipe, createMessageContainer, createDateDivider, isSameDay } from './utils.mjs';
+import { getMedataData, sendMessage, getMessageHistory } from './chat.service.mjs';
 
 
 window.addEventListener("load", setUp);
+// active user is the the property
+const sender = 1;
 
 async function setUp() {
-    const { dateFormat, propertyName, reservationId } = await getMedataData();
-    const metadata = new Metadata(dateFormat, propertyName, reservationId);
-    const uiElements = pipe(buildUiElements, createScrollObserver)({});
+    const metadata = await getMedataData();
+    const uiElements = pipe(buildUiElements, createTranslations(metadata.translations), createScrollObserver)({});
     const addMessagesAndTriggers = pipe(addMessages, createTriggers);   
-    messagesRequest
-    .then((res) => res.json())
-    .then((messages) => addMessagesAndTriggers({messages, uiElements, metadata}) )
-    .catch(console.log);
+    getMessageHistory(metadata.reservationId)
+    .then((messageHistory) => addMessagesAndTriggers({ messageHistory, uiElements, metadata }) )
+    .catch(console.error);
 }
 
-function createNewMessage(body) { 
-    return new Message(body, currentUser);
+function createNewMessage(content) { 
+    const timeStamp = new Date();
+    return new Message({ content, timeStamp, sender });
 }
 
-function createTriggers({messages, uiElements, metadata}) {
-    const callback = inputMessage.bind({ messages, uiElements, metadata});
+function createNewErrorMessage(content) { 
+    const message = createNewMessage(content);
+    const errorFlag = true;
+    return new Message({ ...message, errorFlag });
+}
+
+function createTriggers({messageHistory, uiElements, metadata}) {
+    const callback = inputMessage.bind({ messageHistory, uiElements, metadata});
     uiElements.sendButton.addEventListener('click', callback );
     uiElements.messageInput.addEventListener('keydown', (evt) =>  {
         if(evt.keyCode === 13 && !evt.ctrlKey) {
@@ -38,18 +39,25 @@ function createTriggers({messages, uiElements, metadata}) {
             uiElements.messageInput.value += '\n';
         }
     });
+    //@ TODO add callback when clicking the paperclip button
+    uiElements.paperclipButton.addEventListener('click', (evt) => {
+        evt.preventDefault();
+        console.log(evt);
+    });
 }
 
-function addMessages({messages, uiElements, metadata}) {  
+function addMessages({messageHistory, uiElements, metadata}) {  
     const temp = document.createElement('div'); 
+    const { records } = messageHistory;
     let currentDivider;       
-    messages.forEach((message) => {
-        const dateSent = message.content.dateSent;
+    records.forEach((message) => {
+        const dateSent = message.timeStamp;
          if(!currentDivider || !isSameDay(currentDivider, dateSent)) {
-             temp.appendChild(createDateDivider(dateSent));
+             const dateNode = moment(new Date(dateSent).toISOString()).format(metadata.dateFormat);
+             temp.appendChild(createDateDivider(dateNode));
              currentDivider = dateSent;
          }
-         const messageContainer = createMessageContainer(message, currentUser);
+         const messageContainer = createMessageContainer(message, metadata);
          temp.appendChild(messageContainer);                    
     });
     window.requestAnimationFrame(() => {
@@ -57,23 +65,28 @@ function addMessages({messages, uiElements, metadata}) {
         const _ = existingMessages && uiElements.chatBoxMessages.removeChild(existingMessages);                
         uiElements.chatBoxMessages.appendChild(temp.cloneNode(true)); 
     });
-    return {messages, uiElements};
+    return {messageHistory, uiElements, metadata};
 }
 
 function inputMessage(evt) {
     evt.preventDefault();                
     const formData = new FormData(this.uiElements.messageForm);
+    // @ TODO sanitize message
     const msg = formData.get("message").trim();
     if(!msg.length) {
         return;
     }
-    // @ TODO sanitize message
+    // cleare message input field
     this.uiElements.messageInput.value = '';
-    sendMessage(msg, this.reservationId).then(({success}) => {
-        if(success) {
-            this.messages = this.messages.concat(createNewMessage(msg));
-            addMessages(this);  
+
+    // send message
+    sendMessage(msg, this.metadata.reservationId, sender).then( ({ records }) => {
+        if (records.success) {
+            this.messageHistory.records = this.messageHistory.records.concat(createNewMessage(msg));
+        } else {
+            this.messageHistory.records = this.messageHistory.records.concat(createNewErrorMessage(this.metadata.translations.errorOccured));
         }
+        addMessages(this);
     })
       
 }
@@ -97,6 +110,7 @@ function createScrollObserver(uiElements) {
             // }
         }
     };
+
     // Create an observer instance linked to the callback function
     const observer = new MutationObserver(callback);
 

@@ -1,0 +1,151 @@
+:root {
+    --hoteliga-red: #c90d0d;
+}
+
+body {
+    position: relative;
+    width: 100vw;
+    max-width: 100vw;
+    height: 100vh;
+    margin: 0;
+    font-size: 16px;
+    box-sizing: border-box;
+    font-family:Arial, Helvetica, sans-serif;
+}
+.chat-box {
+    position: absolute;
+    bottom: 10px;
+    left: 30vw;
+    display: flex;
+    width: 400px;
+    max-height: 400px;
+    flex-direction: column;
+}
+.messages {
+    width: 100%;
+    height: calc(100% - 40px);
+    overflow-y: auto;
+    padding-right: 5px;
+}           
+/* width */
+.messages::-webkit-scrollbar {
+    width: 10px;
+}
+
+/* Track */
+.messages::-webkit-scrollbar-track {
+    background: #f1f1f1; 
+}
+
+/* Handle */
+.messages::-webkit-scrollbar-thumb {
+    background: #888; 
+    border-radius: 5px;
+}
+
+/* Handle on hover */
+.messages::-webkit-scrollbar-thumb:hover {
+    background: #555; 
+}
+.messages .avatar {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+}
+.chat-box .type-container {
+    width: 100%;
+    height: 40px;
+}
+.chat-box .type-container form {
+    display: flex;
+}
+.chat-box .type-container textarea {
+    width: 85%;
+    height: 40px;
+    padding: 8px 5px;
+    border: solid 1px #ddd;
+    border-radius: 5px;
+    box-sizing: border-box;
+    white-space: pre-wrap;
+}
+.chat-box .type-container textarea:focus,
+.chat-box .type-container textarea:focus-visible {
+    outline: none;
+    border-color: rgb(129, 126, 126);
+}
+.chat-box .type-container button {
+    width: 8%;
+    padding: 0;
+    margin: 0 10px;
+    cursor: pointer;
+    background-color: transparent;
+    border: none;
+}
+.chat-box .message-container {
+    display: grid;
+    grid-auto-columns: max-content;
+    grid-auto-flow: column;
+    gap: 1em;
+    padding: 10px;
+}
+
+.chat-box .message-container:not(.current-user) {
+    justify-content: end;
+}
+.chat-box .message-container:not(.current-user) .user {
+   /* justify-content: end; */
+   display: none;
+}
+.chat-box .message-container .avatar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: solid 1px var(--hoteliga-red);
+    font-size: 0.9rem;
+    padding-top: 0.1rem;
+    background-color: var(--hoteliga-red);
+    color: #fff;
+    box-sizing: border-box;
+}
+.chat-box .message-container .user {
+    font-size: 1rem;
+    font-weight: bold;
+}
+.chat-box .message-container .date {
+    padding-left: 10px;
+    font-size: 0.8rem;
+    color: rgb(167, 163, 163);
+}
+.chat-box .message-body {
+    position: relative;
+    padding: 8px 8px 8px 0;
+    max-inline-size: 30ch;
+    white-space: pre-wrap;  /* <-- THIS PRESERVES THE LINE BREAKS */
+}
+.chat-box .message-body.has-error {
+    color: var(--hoteliga-red);
+    font-size: 0.8rem;
+    opacity: 0.9;
+}
+.chat-box .message-container:not(.current-user) .message-body {
+    padding-left: 8px;
+    border-radius: 3px;
+    background-color: #ddd;
+}
+.chat-box .message-container:not(.current-user) .message-body:after { /* https://codepen.io/octavioamu/pen/eBkbH */
+    content: '';
+    position: absolute;
+    border: 1px solid rgba(51, 51, 51, 0.19);
+    border-color: transparent #ddd;
+    border-width: 7px 0 7px 6px;
+    top: 35%;
+    right: -5px;
+}
+.chat-box .date-divider {
+    padding: 10px 0;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+
+

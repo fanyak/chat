@@ -104,10 +104,7 @@ function createScrollObserver(uiElements) {
                 // console.log('A child node has been added or removed.');
                 const scrollHeight = chatBoxMessages.scrollHeight;
                 chatBoxMessages.scrollTo(0, scrollHeight);
-            }
-            // else if (mutation.type === 'attributes') {
-            //     console.log('The ' + mutation.attributeName + ' attribute was modified.');
-            // }
+            }            
         }
     };
 
@@ -116,7 +113,9 @@ function createScrollObserver(uiElements) {
 
     // Start observing the target node for configured mutations
     observer.observe(chatBoxMessages, config);
-     // stop observing
+
+    //@TODO - determine the time when we stop observing
     // observer.disconnect();
+
     return uiElements;
 }
